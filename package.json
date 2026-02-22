@@ -24,6 +24,10 @@
     "protobufjs": "^8.0.0",
     "vue-json-pretty": "^2.6.0"
   },
+  "optionalDependencies": {
+    "@oxc-transform/binding-linux-x64-gnu": "^0.112.0",
+    "@oxc-transform/binding-linux-x64-musl": "^0.112.0"
+  },
   "devDependencies": {
     "@nuxt/eslint": "^1.4.1",
     "eslint": "^9.30.0",
