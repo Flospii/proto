@@ -19,7 +19,8 @@ watch(selectedLocale, async (newLocale) => {
         </UButton>
         <template #content>
             <div class="flex flex-col gap-2 p-2">
-                <UButton v-for="locale in availableLocales" :key="locale"
+                <UButton
+v-for="locale in availableLocales" :key="locale"
                     :color="selectedLocale === locale ? 'primary' : 'gray'" variant="ghost"
                     @click="selectedLocale = locale">
                     {{ locale.toUpperCase() }}

@@ -7,9 +7,11 @@
                     {{ t('footer.text') }}
                 </p>
                 <div class="flex gap-3 justify-center">
-                    <UButton v-if="metadata.getInstagramLink" :to="metadata.getInstagramLink" target="_blank"
+                    <UButton
+v-if="metadata.getInstagramLink" :to="metadata.getInstagramLink" target="_blank"
                         icon="i-mdi-instagram" variant="ghost" color="primary" />
-                    <UButton v-if="metadata.getLinkedInLink" :to="metadata.getLinkedInLink" target="_blank"
+                    <UButton
+v-if="metadata.getLinkedInLink" :to="metadata.getLinkedInLink" target="_blank"
                         icon="i-mdi-linkedin" variant="ghost" color="primary" />
                 </div>
             </div>

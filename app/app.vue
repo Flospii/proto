@@ -1,11 +1,11 @@
 <template>
   <UApp :locale="locales[locale]">
     <div class="flex flex-col min-h-screen">
-      <Header></Header>
+      <Header/>
       <main class="flex-grow">
         <NuxtPage />
       </main>
-      <Footer></Footer>
+      <Footer/>
     </div>
   </UApp>
 </template>

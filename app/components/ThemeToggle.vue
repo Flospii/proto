@@ -1,6 +1,7 @@
 <template>
   <ClientOnly v-if="!colorMode?.forced">
-    <UButton :key="colorMode.value" :label="isDark ? 'Dark Mode' : 'Light Mode'"
+    <UButton
+:key="colorMode.value" :label="isDark ? 'Dark Mode' : 'Light Mode'"
       :icon="isDark ? 'radix-icons:moon' : 'radix-icons:sun'" variant="ghost" @click="toggleTheme" />
 
     <template #fallback>

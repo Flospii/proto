@@ -1,20 +1,22 @@
 import { defineStore } from "pinia";
 import { ProtobufDecoder, type DecodedField } from "../utils/protobuf-decoder";
 import { SchemaAnalyzer } from "../utils/schema-analyzer";
+import { markRaw } from "vue";
+
+const analyzer = new SchemaAnalyzer();
 
 export const useProtobufStore = defineStore("protobuf", {
   state: () => ({
-    rawBuffer: new Uint8Array(0),
+    rawBuffer: markRaw(new Uint8Array(0)),
     inputString: "",
     inputFormat: "hex" as "hex" | "base64",
     protoSchema: "",
     selectedTypeName: "",
     decodedHeuristic: [] as DecodedField[],
-    decodedSchema: null as any,
+    decodedSchema: null as DecodedField[] | null,
     availableTypes: [] as string[],
     error: null as string | null,
-    analyzer: new SchemaAnalyzer(),
-    selectedFieldIndex: null as number | null,
+    selectedFieldRange: null as { start: number; end: number } | null,
   }),
 
   actions: {
@@ -26,16 +28,20 @@ export const useProtobufStore = defineStore("protobuf", {
         if (format === "hex") {
           const hex = input.replace(/\s/g, "");
           if (hex.length % 2 !== 0) throw new Error("Invalid hex length");
-          this.rawBuffer = new Uint8Array(
-            hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)),
+          this.rawBuffer = markRaw(
+            new Uint8Array(
+              hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)),
+            ),
           );
         } else {
-          this.rawBuffer = Uint8Array.from(atob(input), (c) => c.charCodeAt(0));
+          this.rawBuffer = markRaw(
+            Uint8Array.from(atob(input), (c) => c.charCodeAt(0)),
+          );
         }
         this.decode();
       } catch (e: any) {
         this.error = `Input error: ${e.message}`;
-        this.rawBuffer = new Uint8Array(0);
+        this.rawBuffer = markRaw(new Uint8Array(0));
         this.decodedHeuristic = [];
       }
     },
@@ -44,8 +50,8 @@ export const useProtobufStore = defineStore("protobuf", {
       this.protoSchema = proto;
       this.error = null;
       try {
-        await this.analyzer.loadSchema(proto);
-        this.availableTypes = this.analyzer.getTypes();
+        await analyzer.loadSchema(proto);
+        this.availableTypes = analyzer.getTypes();
         if (this.availableTypes.length > 0 && !this.selectedTypeName) {
           this.selectedTypeName = this.availableTypes[0] ?? "";
         }
@@ -74,8 +80,8 @@ export const useProtobufStore = defineStore("protobuf", {
       // Do schema decode if available
       if (this.selectedTypeName) {
         try {
-          this.decodedSchema = this.analyzer.decodeWithSchema(
-            this.rawBuffer,
+          this.decodedSchema = analyzer.mapHeuristicToSchema(
+            this.decodedHeuristic,
             this.selectedTypeName,
           );
         } catch (e: any) {
@@ -85,8 +91,8 @@ export const useProtobufStore = defineStore("protobuf", {
       }
     },
 
-    selectField(index: number | null) {
-      this.selectedFieldIndex = index;
+    selectField(range: { start: number; end: number } | null) {
+      this.selectedFieldRange = range;
     },
   },
 });

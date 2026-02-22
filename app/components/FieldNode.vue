@@ -10,6 +10,11 @@
     >
       <div class="flex items-center gap-1 min-w-[30px]">
         <span class="text-xs font-bold text-gray-400">{{ field.index }}:</span>
+        <span
+          v-if="field.name"
+          class="text-sm font-bold text-primary-600 dark:text-primary-400 ml-1"
+          >{{ field.name }}</span
+        >
       </div>
 
       <div class="flex flex-col flex-grow min-w-0">
@@ -57,14 +62,21 @@ const props = defineProps<{
 }>();
 
 const store = useProtobufStore();
-const { selectedFieldIndex } = storeToRefs(store);
+const { selectedFieldRange } = storeToRefs(store);
 
 const isSelected = computed(() => {
-  // This is a simplified selection logic; for real nested selection we might need IDs
-  return false;
+  return (
+    selectedFieldRange.value?.start === props.field.start &&
+    selectedFieldRange.value?.end === props.field.end
+  );
 });
 
-function select() {
-  // store.selectField(props.field.start)
+function select(e: Event) {
+  e.stopPropagation();
+  if (isSelected.value) {
+    store.selectField(null); // Toggle off if already selected
+  } else {
+    store.selectField({ start: props.field.start, end: props.field.end });
+  }
 }
 </script>

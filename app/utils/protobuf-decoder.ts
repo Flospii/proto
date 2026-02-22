@@ -64,7 +64,10 @@ export class ProtobufDecoder {
     return new Date(ms).toISOString();
   }
 
-  static decodeRaw(buffer: Uint8Array): DecodedField[] {
+  static decodeRaw(
+    buffer: Uint8Array,
+    globalOffset: number = 0,
+  ): DecodedField[] {
     const fields: DecodedField[] = [];
     let offset = 0;
 
@@ -110,10 +113,13 @@ export class ProtobufDecoder {
           offset += lenBytes;
           const length = len.toNumber();
           const subBuffer = buffer.subarray(offset, offset + length);
+
+          // The data content of this length-delimited string/message starts at this offset
+          const subGlobalOffset = globalOffset + offset;
           offset += length;
 
           if (this.isProbablyMessage(subBuffer)) {
-            const nested = this.decodeRaw(subBuffer);
+            const nested = this.decodeRaw(subBuffer, subGlobalOffset);
             value = nested;
             type = "message";
 
@@ -159,6 +165,16 @@ export class ProtobufDecoder {
           type = "fixed32";
           break;
         }
+        case WireType.START_GROUP: {
+          value = `Start Group ${fieldNumber}`;
+          type = "start_group";
+          break;
+        }
+        case WireType.END_GROUP: {
+          value = `End Group ${fieldNumber}`;
+          type = "end_group";
+          break;
+        }
         default:
           throw new Error(`Unsupported wire type: ${wireType}`);
       }
@@ -169,8 +185,8 @@ export class ProtobufDecoder {
         raw: buffer.subarray(start, offset),
         value,
         type,
-        start,
-        end: offset,
+        start: globalOffset + start,
+        end: globalOffset + offset,
         formatted,
       });
     }

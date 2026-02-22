@@ -1,5 +1,5 @@
 import protobuf from "protobufjs";
-
+import { type DecodedField } from "./protobuf-decoder";
 export interface SchemaTreeNode {
   name: string;
   fieldNumber: number;
@@ -70,5 +70,48 @@ export class SchemaAnalyzer {
       }),
       unknown: message.constructor.prototype.$unknown || [],
     };
+  }
+
+  mapHeuristicToSchema(
+    heuristicFields: DecodedField[],
+    typeName: string,
+  ): DecodedField[] {
+    if (!this.root) return heuristicFields;
+    try {
+      const Type = this.root.lookupType(typeName) as protobuf.Type;
+      return this.mapFields(heuristicFields, Type);
+    } catch {
+      return heuristicFields;
+    }
+  }
+
+  private mapFields(
+    fields: DecodedField[],
+    type: protobuf.Type,
+  ): DecodedField[] {
+    return fields.map((field) => {
+      const schemaField = type.fieldsById ? type.fieldsById[field.index] : null;
+      let newField = { ...field };
+
+      if (schemaField) {
+        newField.name = schemaField.name;
+
+        // Resolve the type if it's a message
+        if (
+          schemaField.resolve().resolvedType instanceof protobuf.Type &&
+          Array.isArray(field.value)
+        ) {
+          newField.value = this.mapFields(
+            field.value,
+            schemaField.resolvedType as protobuf.Type,
+          );
+          newField.type = schemaField.type;
+        } else {
+          newField.type = schemaField.type;
+        }
+      }
+
+      return newField;
+    });
   }
 }
