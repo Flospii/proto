@@ -17,7 +17,7 @@
       v-model="schema"
       placeholder="Paste your .proto definition here..."
       :rows="10"
-      class="font-mono text-sm"
+      class="font-mono text-sm w-full"
       @update:model-value="onSchemaInput"
     />
 

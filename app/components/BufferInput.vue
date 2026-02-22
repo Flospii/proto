@@ -18,7 +18,7 @@
       v-model="input"
       placeholder="Paste your hex or base64 protobuf payload here..."
       :rows="6"
-      class="font-mono text-sm"
+      class="font-mono text-sm w-full"
       @update:model-value="onInput"
     />
 

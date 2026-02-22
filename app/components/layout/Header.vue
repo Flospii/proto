@@ -5,7 +5,7 @@
                 {{ metadata.capitalizedSiteName }}
             </NuxtLink>
             <nav class="flex items-center space-x-4">
-                <LanguageSwitcher />
+                <!-- <LanguageSwitcher /> -->
                 <ThemeToggle />
             </nav>
         </div>
